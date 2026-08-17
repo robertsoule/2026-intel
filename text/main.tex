@@ -1,0 +1,384 @@
+
+
+
+
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in,includefoot]{geometry}
+
+\usepackage{fancyhdr,setspace}
+
+%\pagestyle{fancy}
+\fancyhead[LE,RO]{\thepage}
+\fancyhead[RE,LO]{\projecttitle}
+\fancyfoot[C]{}
+
+% Color
+\usepackage{xcolor}
+\definecolor{pennblue}{cmyk}{1,.65,0,.3}
+\definecolor{pennred}{cmyk}{0,1,.65,.34}
+
+\newcommand{\todo}[1]{\textit{\textcolor{red}{[TODO]: #1}}}
+\newcommand{\pa}[1]{\textit{\textcolor{blue}{[pa]: #1}}}
+\newcommand{\rjs}[1]{\textit{\textcolor{red}{[rjs]: #1}}}
+
+
+\newcommand{\PAR}[1]{\par\smallskip\noindent\textbf{#1}}
+
+
+\usepackage{alltt}
+\usepackage{wrapfig}
+\usepackage{cmtt}
+\usepackage{paralist}
+\usepackage{lastpage}
+\usepackage{times}
+\usepackage{tikz}
+\usepackage{balance}
+\usepackage{amsmath}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{algorithm,algpseudocode}
+\usepackage{xspace}
+\usepackage{pgfgantt}
+\usepackage{afterpage}
+\usepackage{soul}
+
+\usepackage{enumitem}
+\newcommand{\subscript}[2]{$#1 _ #2$}
+
+\graphicspath{{./figures/}{../figures/}}
+
+\usepackage[colorlinks=true,linkcolor={pennblue},citecolor={pennred},urlcolor={pennblue}]{hyperref}
+\usepackage{url}
+
+\usepackage{amsthm}
+
+
+\usepackage{booktabs}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+\usepackage{listings}
+\usepackage{multicol}
+
+
+\usepackage{url,fullpage,cite,epsfig,xspace,mathpazo,kpfonts,multirow,dcolumn,colortbl,amsmath,amssymb,amsthm,wasysym,pifont,xspace}
+%\usepackage[hang,small,bf]{caption}
+\usepackage[T1]{fontenc}
+
+\newcommand*\circled[1]{%
+\scalebox{0.90}{\begin{tikzpicture}[baseline=-3pt]
+  \node[draw,circle,inner sep=0.5pt, fill=black] {\textcolor{white}{\textsf{#1}}};
+\end{tikzpicture}}}
+
+
+
+\begin{document}
+
+
+ \noindent \rule{\linewidth}{1mm}
+        \noindent {\Large {\bf Smart NIC-based Zero-Copy Serialization }}\\ %\vspace*{0.5cm} 
+	\noindent {\bf Intel Proposal}\\
+        \hfill {\em  Robert Soul\'e} (Yale University) and {\em Rajit Manohar} (Yale University)\\ 
+        \noindent \rule{\linewidth}{1mm}
+
+
+\section{Introduction}
+
+
+Achieving zero-copy I/O has long been an important goal in the
+networking community. Today, some operating systems and NICs have been
+able to achieve this goal with a variety of
+techniques~\cite{varghese10}, including direct memory access (DMA) and
+memory-mapping through an memory management unit.
+\footnote{These techniques---and this proposal---do not truly ensure
+  zero copy. At minimum, they require one memory copy to access main
+  memory, read the object instances, and copy them to the NIC
+  memory. Our use of the term \emph{zero copy} is purely from the
+  CPU's perspective: CPU cores are not involved any memory copy
+  operations.}
+
+
+However, application-level serialization creates a challenge
+ for zero copy I/O. By application-level
+serialization, we mean the process by which the in-memory
+representation of data structures is converted into architecture and
+language independent formats that are transmitted across the
+network. Distributed applications commonly rely on serialization
+libraries, such as Google's Protocol Buffers
+(Protobuf)~\cite{protobuf} or Apache Thrift~\cite{thrift}, when
+sending data from one machine to another.
+
+
+The problem is that application-level serialization encoding requires
+the CPU to read, transform, and write message data, resulting in
+additional memory copies between the real object instances and a
+contiguous buffer.  Figure~\ref{fig:mem-copies} illustrates the
+numerous memory copies required for application-level serialization,
+starting from in-memory RPC objects (\circled{A}), to encoded RPC
+messages (\circled{B}), to kernel socket buffers (\circled{C}), and to
+NIC queues (\circled{D}).
+
+
+
+
+
+
+
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.25\columnwidth]{mem-copies}
+  \caption{Memory copies in a traditional network stack.}
+  \label{fig:mem-copies}
+\end{figure}
+
+
+These additional memory copies are a huge source of overhead,
+and consequently, application-level serialization is one of
+the most widely recognized bottlenecks to system performance. As a
+prime example, Kanev et al.~\cite{kanev15} report that at Google,
+serialization and RPCs are responsible for 12\% of all fleet cycles
+across all applications.  Indeed, they are referred to as the
+``data center tax'', i.e., the cycles that an application
+must pay simply for running in a data center.
+
+
+This bottleneck is not just due to inefficient operations
+(although we will argue in \S~\ref{sec:case} that implementing
+serialization on a CPU is inefficient), but also due to the frequency
+of invocation.  The emerging trend in software engineering towards
+microservices and serverless/functionless computing, which advocates
+for the fine-grained decomposition of software modules, has
+exacerbated the problem. Invoking an innocuous-sounding method,
+\verb|getX|, may result in hundreds or even thousands of RPC calls,
+each requiring data serialization.  The result is the proverbial death
+by a thousand cuts.
+
+To truly achieve high-performance message transfer, we must address
+this bottleneck, and eliminate the extra memory copies. Standard
+DMA techniques are not sufficient, as serialization requires not just
+memory copies, but also data transformation. We therefore argue
+that application-layer message processing logic should be added
+to the DMA path.
+
+Of course, adding a serialization accelerator to NIC hardware assumes
+that the network transport protocol is also offloaded. Transport
+protocol offload itself has been the subject of a
+long-standing debate~\cite{mogul03}. The question is whether the potential
+performance benefits of offloading to a NIC outweigh the costs of the
+added hardware complexity.  However, the combination of the end of
+Moore's law, the increase in network speeds, and the wide-spread
+adoption of RDMA has recently led to revived support for transport
+protocol offload. There are several contemporary proposals for
+offloading network stacks and basic network
+functions~\cite{arashloo20,firestone2018,li2016}.
+
+We argue that these first steps towards offload do not go far enough,
+and advocate for the inclusion of hardware for application-layer
+message processing in a SmartNIC (\S\ref{sec:case}).  We have
+developed an initial hardware design for such an accelerator, which
+uses hard-coded building blocks for performing data transformations,
+and a programmable configuration that allows them to support
+application specific message formats (\S\ref{sec:design}). We refer to
+our design as Zerializer, which allows for zero-copy I/O augmented
+with serialization in the DMA path, or what we call \emph{zero-copy
+serialization} directly between \circled{A} and \circled{D}.
+
+
+
+\subsection*{MASON: \underline{M}emory \underline{a}t \underline{S}cale \underline{O}n \underline{N}etworks}
+
+
+In this project, we propose Mason, a clean-slate approach to
+ networking designed for a data-centric future of explicit identity
+ and pervasive compute.  The overarching goal of Mason is to make
+ large pools of high-capacity persistent memory available to a cluster
+ of heterogeneous computing devices. We've distilled this goal into
+ three related, but independent research questions:
+
+
+\begin{enumerate}[leftmargin=*, label=(\subscript{Q}{{\arabic*}})]
+
+\item What is the appropriate functionality and semantics
+for memory protocols over network fabrics?
+
+\item What is the appropriate role of a computation-enhanced
+  network in the context of disaggregated, persistent memory?
+
+\item How can we provide fault-tolerance and robustness for
+persistent memory that is accessed remotely via a memory fabric?
+
+\end{enumerate}
+
+
+
+\noindent To answer these questions, we propose to investigate the following research tracks:
+
+
+
+
+\PAR{Track 1: Network as a Memory Bus.}
+%
+We have argued that there will be a convergence of network and memory
+protocols, and by analogy, the network will perform the role of a
+memory bus. Consequently, there will be a need to revisit several
+important design choices about the design of these converged protocols
+with respect to basic functionality, such as reliable delivery,
+congestion control, etc.. Beyond protocol design, as we will discuss
+below, it seems both natural and inevitable that the network will need
+to take a more active role in services not traditionally associated
+with networking, such as abitration of data access and error handling.
+
+
+
+\PAR{Track 2: Explicit Identity in the Network.}
+%
+With disaggregated, persistent memory, the location of data will be
+fluid. Data will move to where it is needed for computing; replicated
+to provide reliability; or cached to increase performance. Thus, just
+as a pointer identifying an application-defined data strucure or
+object will no longer be tied to an ephemeral process, it will also
+not tied to a particular location. Therefore, we will need to push the
+concept of identifiers into the network, and support addressing based
+on those identifiers in a location-independent manor.  The research
+challenge will be in how to implement these abstractions efficiently
+in controlled, data center deployments.
+
+
+
+\PAR{Track 3: Fault Tolerance and Robustness.}
+%
+ To make disaggregated memory access practical, we will need to solve
+ the problem of how to guard against unavoidable storage wear-out and
+ memory failures---problems traditionally absent from ``main memory''
+ and handled by software at leisurely timescales in the domain of
+ storage. This suggests the need for replication, and with that,
+ the challenge of ensuring strongly consistent access, typically
+ addressed in distributed systems by a consensus protocol like
+ Paxos. However, in the context of memory, 
+  there is no sense in ensuring strong consistency for main
+  memory storage if the cache coherence protocol does not provide
+  similar guarantees. We will therefore need to explore the
+  relationship beween consensus and cache coherence. Moreover,
+  we argue that both of these concepts will be strongly
+  connected to the network protocols and functionality we design.
+
+
+
+\PAR{Overview.}
+%
+
+
+Each of the tasks described above stand as independent research directions
+on their own. For example, exploring the relationship between
+cache coherence and consistency (Track 3), these could be explored
+in the context of databases and distributed systems, without
+ dependencies on network/memory protocols (Track 1).
+However, taken together, the resulting system will 
+be more than the sum of its parts.
+
+
+If successful, this project will provide the network foundation
+to make large-scale persistent
+memory available to clusters of machines, allowing the machines to
+share it, provision it dynamically, and mirror it with high
+performance. Such an architecture would result in a radically
+different---and dramatically simpler---programming model for building
+distributed systems in general, and storage systems in particular.
+
+
+\subsection{Research Team and Investigator Qualifications}
+%
+The research team will consist of a graduate student and two investigators:
+Professors Robert Soul\'{e} and Rajit Manohar.
+
+
+\section{Current Status of Our Research}
+\label{sec:ourwork}
+
+
+
+\section{Detailed Research Plan}
+\label{sec:plan}
+
+
+
+
+\section{Project Timeline}
+
+
+\section{Anticipated Tech Transfer to Intel}
+
+There are several potential avenues for tech transfer from the project
+back to Intel. Below we highlight a few key examples:
+
+\begin{itemize}
+\item \emph{Open source proof of concepts:} The PIs will release
+all code developed as part of the project as open source. The results
+of these proofs-of-concept can be hoisted into Intel developed software.
+
+\item  \emph{Techniques folded into existing programmable network components:}
+Developing software or algorithms for programmable networks often
+requires a fair amount of creativity due to resource constraints of the devices.
+The techniques developed in this project can be re-used for other projects
+targeting e.g., Tofino switches or programmable NICs.
+
+\item \emph{Scalable directory service:} Chang Kim, Intel Fellow, CTO BXD Applications, identified the design of a scalable directory service as being of value
+to BXD organization.
+
+\item \emph{Avi Silberschatz’ textbooks:} PI Silberschatz is the author of two widely used textbooks, “DB Concepts” and “OS Concepts”. The PI could update these textbooks with expanded discussions of new types of memory (e.g., Intel Optane).
+
+\item \emph{Application to Industrial IoT:} Champion Eve Schooler and
+ Daniel Alvarez/BXD Tofino telemetry have identified this work as
+ being relevant to industrial IoT in data centers where low-latency is a
+ strong concern.
+
+\end{itemize}
+
+
+
+
+%% \section{Budget}
+
+%% The proposal requests a budget of \$140K-\$150K per year for three year. This
+%% will be used to fund 3 semesters of study for 2
+%% students (i.e., 2 semesters at UCSC, 1 semester at Yale) plus partial summer support
+%% for 2 PIs (Soul\'{e} and Silberschatz), plus overhead. If the proposal
+%% is funded as a gift, then the overhead rates are 12\% at Yale and 6\% at UCSC.
+%% The details of the budget are presented in Figures~\ref{fig:yale-budget} and ~\ref{fig:ucsc-budget}.
+
+%% \begin{figure}[h]
+%%   \centering
+%%   \includegraphics[width=\columnwidth]{yale-budget.png}
+%%   \caption{Budget breakdown for Yale.}
+%%   \vspace{-1mm}
+%%   \label{fig:yale-budget}
+%% \end{figure}
+
+%% \begin{figure}[h]
+%%   \centering
+%%   \includegraphics[width=\columnwidth]{ucsc-budget.png}
+%%   \caption{Budget breakdown for UCSC.}
+%%   \vspace{-1mm}
+%%   \label{fig:ucsc-budget}
+%% \end{figure}
+
+
+\pagebreak
+
+{\footnotesize
+\bibliographystyle{abbrv}
+\balance
+\bibliography{main}
+}
+
+
+\end{document}
+
+
+
+
+
+
+
+
