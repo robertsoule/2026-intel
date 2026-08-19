@@ -94,9 +94,11 @@ programmable accelerator for the KV cache}
 
 \begin{alltt}\scriptsize
 We will evaluate one accelerator on three different strategies:
-- Plain vanilla
-- shared (grouped) attention
-- low rank factorization
+- Multi-Head Attention (MHA)~\cite{vaswani2017} and Multi-Query Attention~\cite{shazeer2019}
+
+
+- shared (grouped) attention GQA~\cite{ainslie2023}
+- Multi-head Latent Attention (MLA)~\cite{deepseekv2}  (i.e., low rank factorization)
 \end{alltt}
   
 \begin{alltt}\scriptsize
