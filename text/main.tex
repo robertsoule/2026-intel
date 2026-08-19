@@ -140,15 +140,6 @@ the (K,V) entries in the memory hierarchy.
 
 
 \begin{alltt}\scriptsize
-We will evaluate one accelerator on three different strategies:
-- Multi-Head Attention (MHA)~\cite{vaswani2017} and Multi-Query Attention~\cite{shazeer2019}
-
-
-- shared (grouped) attention GQA~\cite{ainslie2023}
-- Multi-head Latent Attention (MLA)~\cite{deepseekv2}  (i.e., low rank factorization)
-\end{alltt}
-  
-\begin{alltt}\scriptsize
   - You don't have enough memory to accomodate all data
   - you need to coordinate the ``master set''
   - need to hide latency in accessing the master set
@@ -191,7 +182,18 @@ collaboration with Intel. Indeed, both PIs have worked as
 contractors for Intel in the past.
 
 
+\PAR{Evaluation Plan.}
+%
 
+\begin{alltt}\scriptsize
+We will evaluate one accelerator on three different strategies:
+- Multi-Head Attention (MHA)~\cite{vaswani2017} and Multi-Query Attention~\cite{shazeer2019}
+
+
+- shared (grouped) attention GQA~\cite{ainslie2023}
+- Multi-head Latent Attention (MLA)~\cite{deepseekv2}  (i.e., low rank factorization)
+\end{alltt}
+  
 
 %% \begin{alltt}\scriptsize
 %%   - Techniques we develop will be open-sourced
@@ -261,10 +263,15 @@ design.
 
 \PAR{Test Environment.}
 %%
-The PIs maintain a small cluster of Dell R740 servers.
-
-TODO: talk about Yale cluster
-TODO: talk about FPGA boards -- already done CPU/network changes on FPGA
+The PIs maintain a small cluster of servers with Intel(R) Xeon(R) Gold
+6240 CPUs, 2 programmable switches based on Intel/Barefoot Tofino
+ASICs, and a wide variety of NICs, including Intel E810-CQDA2 100GbE
+(Columbiaville) and Mellanox ConnectX-5s. The PIs also have a variety
+of FPGAs for development, including two Xilinx Alveo U250, two Xilinx
+NetFPGA SUME, and a Xilinx Virtex UltraScale+ VCU118.  The PIs also
+have access access to the Yale high-performance Bulldog clusters,
+which have over 1200 nodes, over 13,000 cores, and over 2.5 petabytes
+of high-performance storage, and a wide variety of GPUs.
 
 
 \PAR{Collaboration Plan and Progress.}
