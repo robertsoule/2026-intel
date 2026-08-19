@@ -130,7 +130,7 @@ high-bandwidth KC Cache access and management.
 \PAR{Project Goals.}
 %
 The central goal of this proposal is to: \emph{develop a
-programmable accelerator for the KV cache}
+programmable hardware accelerator for the KV cache}. 
 
 \begin{alltt}\scriptsize
 We will evaluate one accelerator on three different strategies:
@@ -162,12 +162,35 @@ CPU-attached design
 
 \PAR{Anticipated Impact or Tech Transfer to Intel.}
 %
+There is considerable competition to develop low-latency
+inference pipelines. Companies like Cerebras, Grok, Groq, and
+Etched are all proposing alternatives to NVidia's GPU
+hegemony. However, all of these efforts focus on compute
+performance, rather than the KV Cache performance. If this
+project is successful, it will have a significant and broad
+impact, as all of these options face the memory bottleneck.
 
-\begin{alltt}\scriptsize
-  - Techniques we develop will be open-sourced
-  - Possible to inform IPU / CPU archirecture enhancements
-  - Intern
-\end{alltt}
+The results of this work will be disseminated in top-tier technical
+conferences (e.g., SOSP, OSDI, ASPLOS, etc.) and the artifacts will be
+placed in the public domain under an open-source license.
+These results and artifacts can be used to inform possible
+enhancements to IPU and CPU architectures to enable
+the deployment of high-performance KV Caches.
+
+The student funded by this project will be encouraged to intern
+at Intel during the summer, allowing for a direct transfer of
+knowledge. Moreover, the PIs have a long history of close
+collaboration with Intel. Indeed, both PIs have worked as
+contractors for Intel in the past.
+
+
+
+
+%% \begin{alltt}\scriptsize
+%%   - Techniques we develop will be open-sourced
+%%   - Possible to inform IPU / CPU archirecture enhancements
+%%   - Intern
+%% \end{alltt}
   
 
 \PAR{Project Deliverables.}
