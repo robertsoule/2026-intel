@@ -195,15 +195,20 @@ contractors for Intel in the past.
 
 \PAR{Project Deliverables.}
 %
-After one year of work, we expect to deliver: ...
-
-\begin{alltt}\scriptsize
-  - Year 1, architectural study and workload analysis, detailed design doc 
-  - Year 2, initial FPGA Prototype
-  - Year 3, Optimized FPGA Prototype (focus on network-to-memory latency, algorithmic
-    changes due to anticipated changes in LLM algorithms)
-\end{alltt}
-  
+The work described in this proposal will be conducted by a
+team of two PIs and one graduate student. The project will
+feature three major demonstrator milestones at yearly intervals.
+\begin{itemize}[leftmargin=*]
+\item \emph{Year 1:} An architectural study and workload analysis of a diverse set of models and
+  their KV Cache access patterns. The study will also inform detailed design document for the
+  proposed KV Cache accelerator.
+\item \emph{Year 2:} An initial proof-of-concept artifact in the form of an FPGA prototype. The
+  RTL will be released under an as open source license.
+\item \emph{Year 3:} An improved FPGA prototype that improves on the initial release by:
+  (i) optimizing communication overhead for remote memory
+  access and (ii) updates the design to incorporate anticipated changes in LLM algorithms.
+\end{itemize}
+    
 
 \PAR{Biggest Technical Risk.}
 %
@@ -257,7 +262,14 @@ TODO: talk about FPGA boards -- already done CPU/network changes on FPGA
 
 \PAR{Collaboration Plan and Progress.}
 %%
-To demonstrate our progress, we will have conference calls with our Intel Sponsor, James Tsai, as well as interested Intel collaborators, including Susanne Balle, on a bi-weekly basis. 
+The Yale team will have regular physical meetings on campus.  These
+meetings will be complemented by virtual meetings with our Intel
+Sponsor, James Tsai, as well as interested Intel collaborators,
+including Susanne Balle, on a bi-weekly basis. We will store code and
+any documents in a common repository, which enables cooperative
+development.
+
+
 
 
 {\tiny
