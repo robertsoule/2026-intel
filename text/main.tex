@@ -96,19 +96,19 @@ high-dimensional key-value (KV) states into a tiny, low-dimensional
 latent vectors.
 
 Likely, the last word has not yet been written on KV Cache compression
-or management technique. But, what is clear is that any solution
-will need to effectively leverage both on-chip and off-chip memory access.
-While decades of research has taught us that this is a hard problem
-in general, inference workload memory access patterns are extremely
+or management technique. But, what is clear is that any solution will
+need to effectively leverage both on-chip and off-chip memory access.
+While decades of research has taught us that this is a hard problem in
+general, inference workload memory access patterns are extremely
 predictable, suggesting that it should be possible to develop
-effective high-bandwidth KV cache management algorithms analagous
-to cache hierarchies in modern CPUs. However, unlike CPUs, which
-have hard coded pre-fetch and cache replacement policies, KVCaches
-need flexibility to adapt to model and workload changes.
+effective high-bandwidth KV cache management algorithms analagous to
+cache hierarchies in modern CPUs. However, unlike CPUs, which have
+hard coded pre-fetch and cache replacement policies, KV Caches need
+flexibility to adapt to model and workload changes.
 
-Rather that proposing a software solution, this project proposes the
-development of dedicated hardware to enable low-latency,
-high-bandwidth KC Cache access and management.
+Rather that proposing a pure software solution, this project proposes
+the development of dedicated programmable hardware to enable
+low-latency, high-bandwidth KV Cache access and management.
 
 %% \begin{alltt}\scriptsize
 %%   - LLMs are only effective if the context is large
@@ -129,8 +129,15 @@ high-bandwidth KC Cache access and management.
 
 \PAR{Project Goals.}
 %
-The central goal of this proposal is to: \emph{develop a
-programmable hardware accelerator for the KV cache}. 
+The central goal of this proposal is to: \emph{develop a programmable
+hardware accelerator for the KV cache}. The accelerator is
+CPU-attached, so that it can leverage CPU software/hardware resources
+to access the largest memory capacity possible. A KV cache request
+will be associated with a specific context tag and layer identifer,
+where the layer identifier can be used to determine the location of
+the (K,V) entries in the memory hierarchy.
+
+
 
 \begin{alltt}\scriptsize
 We will evaluate one accelerator on three different strategies:
