@@ -114,48 +114,28 @@ Expressed succinctly, the research goals of this proposal are to:
 The proposed work will be carried out by a team
 of three researchers: the two faculty PIs, and one PhD
 student. PI Soul\'{e} is a
-recognized expert in data plane programming.  He spent a sabbatical at
-Barefoot Networks, and has published extensively on the topic.
+recognized expert in software-defined networks. 
 Professor Manohar is an expert in asynchronous hardware
 design. 
 
-
-both operating systems, databases,
-and distributed systems.
-PI Silberschatz is a fellow of the ACM, a fellow the IEEE, and a member
-of the Connecticut Academy of Science and Engineering.
-He is the author of two well-known textbooks, ``Operating
-System Concepts'' and “Database System Concepts.”
 
 
 
 \PAR{Test Environment.}
 %%
-The PIs maintain a small cluster of Dell R740 servers with 1.5TB of
-Optane memory. To experiment and evaluate new network protocols and
-support, we will rely eBPF to modify the kernel, or a set of Pensando
-25G NICs that have been donated to us. We will need Cisco Tofino-based
-Nexus switches to evaluate different protocols in the network core. We
-will therefore need to acquire 2x Cisco Nexus 34180YC Programmable
-switches.
+The PIs maintain a small cluster of Dell R740 servers.
+
+TODO: talk about Yale cluster
 
 
 \PAR{Collaboration Plan and Progress.}
 %%
-To demonstrate our progress, we will have conference calls with our Intel Sponsor, James Tsai, on a bi-weekly basis. 
+To demonstrate our progress, we will have conference calls with our Intel Sponsor, James Tsai, as well as interested Intel collaborators, including Susanne Balle, on a bi-weekly basis. 
 
-%% To avoid semantic conflict between user vs. cisco p4 programs, some of the metadata should be hidden or made immutable for the user pipe, but I guess P4_16 already can handle such needs.
 
 \PAR{Expected Outcome.}
 %
-After one year of work, we expect to deliver: an operating
-system kernel modification that can issue remote memory requests that include the
- permanent pointer. The second milestone will be to route
- these memory requests across multiple hops (i.e., more than
- one forwarding element). The third milestone will be to map
- these requests to ABD consensus requests across replicated
- memory instances. A forth (and stretch) goal will be to add
- support for capabilities.
+After one year of work, we expect to deliver: ...
 
 
 %% \PAR{Data Policy.} We will publicly release as open-source all code,
