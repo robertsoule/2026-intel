@@ -45,12 +45,6 @@
 
 \begin{document}
 
-%% Your proposal should outline the specific problem and goals of your research, and ideally, be limited to 2 pages.
-
-
-%% - A description of the planned testing environment and how it will demonstrate advances in networking capabilities relevant to the research context.
-%% - A plan for conducting periodic demonstrations.
-%% - A description of metrics to be used to assess the performance of their systems, along with a timetable and methodology for such assessments.
 
 \section*{Intel Connectivity: A Hardware Accelerator for Key-Value (KV) Caches}
 
@@ -60,16 +54,6 @@ Yale University 10 Hillhouse Avenue,, New Haven, CT, 06511.
 
 \PAR{Intel contact and sponsor:} James Tsai
   (\href{james.tsai@intel.com}{james.tsai@intel.com})
-
-
-%% At the top of the hierarchy are
-%% SRAM caches and DRAM main memory, which have low latency, unlimited
-%% write endurance, and fine granularity of access.  They are, however,
-%% power-hungry, expensive and volatile, necessitating further tiering to
-%% solid-state NAND flash storage (SSD), and finally to spinning disk or
-%% tape magnetic storage at the bottom of the hierarchy. These terminal
-%% tiers of non-volatile and durable bit storage have much higher access
-%% latency and granularity than volatile memory.
 
 
 
@@ -83,7 +67,21 @@ and ...
 As a result, the current performance bottleneck for the decode phase is not
 compute, but rather, memory bandwidth (limited by loading model weights and the growing cache from memory).
 
-
+\begin{alltt}\scriptsize
+  - LLMs are only effective if the context is large
+  - As a consequence, the limiting factor for performance is memory bandwidth
+  - Today, state of the art is you run KV cache using GPU HBM
+  - Different models have different strategies for optimizing the KV Cache
+  - But, given a model, the access is very predictable
+  - This calls for a programmable memory hierarchy that leverages
+  hybrid on-chip and off-chip memory access
+  - So, we get an effective high-bandwidth KV cache in a similar way
+  to the cache hierarchy in a modern CPU
+  - Unlike the CPU, though, where you have a baked in pre-fetch and caching
+  policy, we need more flexibility because the model changes the way
+  the KV cache is used (See DeepSeek approach, etc.)
+\end{alltt}
+  
 
 
 Attention~\cite{vaswani2017}
@@ -91,36 +89,85 @@ Attention~\cite{vaswani2017}
 
 \PAR{Project Goals.}
 %
-The central problem motivating this proposal is: \emph{what
-  ...?}
+The central goal of this proposal is to: \emph{develop a
+programmable accelerator for the KV cache}
 
+\begin{alltt}\scriptsize
+We will evaluate one accelerator on three different strategies:
+- Plain vanilla
+- shared (grouped) attention
+- low rank factorization
+\end{alltt}
+  
+\begin{alltt}\scriptsize
+  - You don't have enough memory to accomodate all data
+  - you need to coordinate the ``master set''
+  - need to hide latency in accessing the master set
+- We have a scratch pad (i.e., accelerated managed memory, on chip SRAM)
+- Dot product
+- model meta data, which tells you how to do the pre-fetching, what is
+currently active
+- a programmable/extensible prefetch mechanism (orchestrate for JIT
+  prefetch)
+  - Runtime support to inform the prefetch mechanism of requests/workload
+  - low latency memory-to-network  data transfer (possibly RDMA, but
+    maybe not)
+\end{alltt}
 
-Expressed succinctly, the research goals of this proposal are to:
-\begin{enumerate}[nolistsep]
-\item ...
-\item ...
-\item ...
-\item ...
-
-\end{enumerate}
-
+\begin{alltt}\scriptsize
+CPU-attached design
+\end{alltt}
 
 \PAR{Anticipated Impact or Tech Transfer to Intel.}
 %
+
+\begin{alltt}\scriptsize
+  - Techniques we develop will be open-sourced
+  - Possible to inform IPU / CPU archirecture enhancements
+  - Intern
+\end{alltt}
+  
 
 \PAR{Project Deliverables.}
 %
 After one year of work, we expect to deliver: ...
 
+\begin{alltt}\scriptsize
+  - Year 1, architectural study and workload analysis, detailed design doc 
+  - Year 2, initial FPGA Prototype
+  - Year 3, Optimized FPGA Prototype (focus on network-to-memory latency, algorithmic
+    changes due to anticipated changes in LLM algorithms)
+\end{alltt}
+  
+
 \PAR{Biggest Technical Risk.}
 %
 
+\begin{alltt}\scriptsize
+  - We could discover that the ideal memory hierarchy
+   requires additional off-chip changes
+\end{alltt}
+  
 
 \PAR{Impact to Intel If Not Pursued.}
 %
 
+
+\begin{alltt}\scriptsize
+  - KVcache latency is a critical problem that actively
+  being pursued both by academia and business competitors
+\end{alltt}
+  
+
 \PAR{Differentiation from Existing Projects.}
 %
+
+\begin{alltt}\scriptsize
+  - Many optimizations explored for KV Cache are purely software
+  and GPU focused
+  - We co-design hw/sw for an optimal solution
+\end{alltt}
+  
 
 
 \PAR{Research Team.}
@@ -140,18 +187,13 @@ design.
 The PIs maintain a small cluster of Dell R740 servers.
 
 TODO: talk about Yale cluster
+TODO: talk about FPGA boards -- already done CPU/network changes on FPGA
 
 
 \PAR{Collaboration Plan and Progress.}
 %%
 To demonstrate our progress, we will have conference calls with our Intel Sponsor, James Tsai, as well as interested Intel collaborators, including Susanne Balle, on a bi-weekly basis. 
 
-
-
-%% \PAR{Data Policy.} We will publicly release as open-source all code,
-%% as well as the data sets used to evaluate our system, except for those
-%% components and data that would reveal proprietary information from our
-%% partners.
 
 {\tiny
 \bibliographystyle{abbrv}
