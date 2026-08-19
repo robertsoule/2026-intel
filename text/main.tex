@@ -59,13 +59,27 @@ Yale University 10 Hillhouse Avenue,, New Haven, CT, 06511.
 
 \PAR{Problem Statement.}
 %
-There is intense competition to build the lowest-latency inference pipelines.
-Companies such as Cerebras, Grok, Groq, and Etched have developed specialized
-hardware accelerators that threaten Nvidia's GPU hegemony on compute platforms
-and ...
+Large Language Models (LLMs) are only effective if their context is
+large.  The context allows the LLM to understand continuing
+conversations, follow multi-step directions, and process large
+documents. An LLM's active runtime context is stored in the key-value
+cache (KV cache).  As the model generates new tokens one by one, it
+appends them to the cache and accesses the stored keys and values to
+understand the ongoing context. However, for each token generated in
+an inference pipeline, the number of floating-point operations (FLOPs)
+per byte of memory read is very low. At the same time, hardware
+compute power has grown much faster than memory transfer speed. As a
+consequence, the limiting factor for performance for inference
+pipelines is memory bandwidth.
 
-As a result, the current performance bottleneck for the decode phase is not
-compute, but rather, memory bandwidth (limited by loading model weights and the growing cache from memory).
+Today, the state-of-the-art pipeline design deploys the KV cache on a
+GPU, where High-Bandwidth Memory (HBM) allows for high-throughput
+memory requests. However, as model and context sizes grow, the context
+often exceeds the capacity of GPU HBM, necessitating moving moving
+gigabytes of key and value vectors back and forth across the PCIe slot
+from CPU RAM to GPU registers.
+
+
 
 \begin{alltt}\scriptsize
   - LLMs are only effective if the context is large
