@@ -132,11 +132,45 @@ low-latency, high-bandwidth KV Cache access and management.
 The central goal of this proposal is to: \emph{develop a programmable
 hardware accelerator for the KV cache}. The accelerator is
 CPU-attached, so that it can leverage CPU software/hardware resources
-to access the largest memory capacity possible. A KV cache request
-will be associated with a specific context tag and layer identifer,
-where the layer identifier can be used to determine the location of
-the (K,V) entries in the memory hierarchy.
+to access the largest memory capacity possible.
 
+A KV cache request will be associated with a specific context tag and
+layer identifer, where the layer identifier can be used to determine
+the location of the (K,V) entries in the memory hierarchy. The layer
+identifier determines the model and location within the model of the
+attention head, and the context tag determines the user query context.
+The user's history of queries will be used to predict the next query
+time, providing a set of constraints to the pre-fetch engine about
+when data must be ready in the on-chip scratch pad memory.
+
+Given a set of anticipated KV cache access times, the pre-fetch engine
+must prioritize access to the memory system and schedule requests so
+that KV entries are avaiable ``just in time'' to maximize the benefit
+of on-chip memory and hide any latency for accessing entries that are
+far away in the memory hierarchy. In addition, the software can also
+invalidate a KV cache entry/slot once a particular model run is
+complete. 
+
+Overall, we will design a programmable pre-fetch engine based on the
+the range of current software strategies used to optimize KV cache
+storage. In addition, we will create a well-defined application programming
+interface to the accelerator from the CPU so that it can be easily
+integrated into standard software frameworks for hosting models such
+as vLLM. Finally, we plan to develop an FPGA-based prototype of our
+KV cache accelerator.
+
+Note that the cache has to operate in a multi-request environment
+where a server may be hosting multiple types of models, as well as
+simultaneously serving multiple users. We will conduct a workload
+analysis to create a set of timestamped user request traces that will
+drive the evaluation of our accelerator.
+
+Parameters of the design space we will explore include: (i)~what are
+the different memory types that need to be integrated to maximize the
+performance of such an accelerator? (ii)~what are the trade-offs in
+capacity, latency, and application performance? (iii)~how much latency can be
+hidden with smart pre-fetching? (iv)~what query throughput can be
+supported with a given on-chip memory capacity?
 
 
 \begin{alltt}\scriptsize
