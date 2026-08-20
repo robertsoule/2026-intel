@@ -219,9 +219,10 @@ To some extent, we have de-risked the project, as the PIs
 have developed several FPGA-based prototype systems in the past.
 That said, the largest possible threat to the success of this
 project, in our opinion, would be if we discovered that
-the ideal memory hierarchy for KV Cache requires unexpected
-off-chip changes. \rjs{I'm not sure what to say
-  about how to mitigate this risk.}
+KV Caches require significant changes to the current CPU off-chip 
+interfaces. However, we think this risk is partially mitigated
+by the fact that industry-standard I/O and memory interfaces have
+been standardized and, in many cases, driven by Intel (e.g., PCIe).
 
 
 \PAR{Impact to Intel If Not Pursued.}
@@ -229,19 +230,16 @@ off-chip changes. \rjs{I'm not sure what to say
 KV Cache latency is a critical problem for inference
 pipelines that is actively
 being investigated both by academia and industry.
-Without a solution, Intel would be a competitive
-disadvantage compared to industry rivals.
-\rjs{@rajit: how is this?}
+If Intel does not offer a solution, industry would
+adopt alternative approaches.
 
 \PAR{Differentiation from Existing Projects.}
 %
-
-\begin{alltt}\scriptsize
-  - Many optimizations explored for KV Cache are purely software
-  and GPU focused
-  - We co-design hw/sw for an optimal solution
-\end{alltt}
-  
+As discussed above, there have been significant efforts
+in designing algorithms to improve KV Cache usage and
+management. Rather than a pure software-based approach,
+we are proposing an extensible hardware-software co-design that
+optimizes the KV Cache access.
 
 
 \PAR{Research Team.}
