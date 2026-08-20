@@ -134,14 +134,26 @@ hardware accelerator for the KV cache}. The accelerator is
 CPU-attached, so that it can leverage CPU software/hardware resources
 to access the largest memory capacity possible.
 
-A KV cache request will be associated with a specific context tag and
+The main components of the accelerator include: (i)~a metadata table;
+(ii)~scratch pad memory; (iii)~the programmable prefetch engine with
+support for multiple simultaneous prefetch streams; and
+(iv)~controller for CPU/accelerator communication. As a stretch goal
+(v), we would include a direct network path to the accelerator,
+enabling IPU integration.
+
+The metadata in the accelerator includes a specific context tag and
 layer identifer, where the layer identifier can be used to determine
 the location of the (K,V) entries in the memory hierarchy. The layer
 identifier determines the model and location within the model of the
 attention head, and the context tag determines the user query context.
+The CPU will associate the mapping of these tags with memory addresses
+where the KV cache is to be stored.
+
 The user's history of queries will be used to predict the next query
 time, providing a set of constraints to the pre-fetch engine about
-when data must be ready in the on-chip scratch pad memory.
+when data must be ready in the on-chip scratch pad memory. The scratch
+pad has to be sized appropriately to hide prefetch latency and meet
+the query throughput demand.
 
 Given a set of anticipated KV cache access times, the pre-fetch engine
 must prioritize access to the memory system and schedule requests so
@@ -151,12 +163,21 @@ far away in the memory hierarchy. In addition, the software can also
 invalidate a KV cache entry/slot once a particular model run is
 complete. 
 
-Overall, we will design a programmable pre-fetch engine based on the
-the range of current software strategies used to optimize KV cache
-storage. In addition, we will create a well-defined application programming
-interface to the accelerator from the CPU so that it can be easily
+We will create a well-defined application programming interface to the
+controller in the accelerator from the CPU so that it can be easily
 integrated into standard software frameworks for hosting models such
-as vLLM. Finally, we plan to develop an FPGA-based prototype of our
+as vLLM.
+
+Finally, to optimize latency even further, we will explore integrating
+a direct network path to/from the accelerator. In this case, the CPU
+would be primarily responsible for management, programming the
+accelerator, and handling non-standard KV cache types. In this mode,
+the accelerator behaves like the CPU counterpart of a network
+end-point from the perspective of the IPU.
+
+To summarize, we will design a programmable pre-fetch engine based on
+the the range of current software strategies used to optimize KV cache
+storage.  Finally, we plan to develop an FPGA-based prototype of our
 KV cache accelerator.
 
 Note that the cache has to operate in a multi-request environment
@@ -168,29 +189,29 @@ drive the evaluation of our accelerator.
 Parameters of the design space we will explore include: (i)~what are
 the different memory types that need to be integrated to maximize the
 performance of such an accelerator? (ii)~what are the trade-offs in
-capacity, latency, and application performance? (iii)~how much latency can be
-hidden with smart pre-fetching? (iv)~what query throughput can be
-supported with a given on-chip memory capacity?
+capacity, latency, and application performance? (iii)~how much latency
+can be hidden with smart pre-fetching? (iv)~what query throughput can
+be supported with a given on-chip memory capacity?
 
 
-\begin{alltt}\scriptsize
-  - You don't have enough memory to accomodate all data
-  - you need to coordinate the ``master set''
-  - need to hide latency in accessing the master set
-- We have a scratch pad (i.e., accelerated managed memory, on chip SRAM)
-- Dot product
-- model meta data, which tells you how to do the pre-fetching, what is
-currently active
-- a programmable/extensible prefetch mechanism (orchestrate for JIT
-  prefetch)
-  - Runtime support to inform the prefetch mechanism of requests/workload
-  - low latency memory-to-network  data transfer (possibly RDMA, but
-    maybe not)
-\end{alltt}
+%% \begin{alltt}\scriptsize
+%%   - You don't have enough memory to accomodate all data
+%%   - you need to coordinate the ``master set''
+%%   - need to hide latency in accessing the master set
+%% - We have a scratch pad (i.e., accelerated managed memory, on chip SRAM)
+%% - Dot product
+%% - model meta data, which tells you how to do the pre-fetching, what is
+%% currently active
+%% - a programmable/extensible prefetch mechanism (orchestrate for JIT
+%%   prefetch)
+%%   - Runtime support to inform the prefetch mechanism of requests/workload
+%%   - low latency memory-to-network  data transfer (possibly RDMA, but
+%%     maybe not)
+%% \end{alltt}
 
-\begin{alltt}\scriptsize
-CPU-attached design
-\end{alltt}
+%% \begin{alltt}\scriptsize
+%% CPU-attached design
+%% \end{alltt}
 
 \PAR{Anticipated Impact or Tech Transfer to Intel.}
 %
@@ -239,9 +260,8 @@ feature three major demonstrator milestones at yearly intervals.
   proposed KV Cache accelerator.
 \item \emph{Year 2:} An initial proof-of-concept artifact in the form of an FPGA prototype. The
   RTL will be released under an as open source license.
-\item \emph{Year 3:} An improved FPGA prototype that improves on the initial release by:
-  (i) optimizing communication overhead for remote memory
-  access and (ii) updates the design to incorporate anticipated changes in LLM algorithms.
+\item \emph{Year 3:} A design revision that enables IPU integration,
+  ideally with Intel colleagues.
 \end{itemize}
     
 
