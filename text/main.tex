@@ -163,7 +163,7 @@ far away in the memory hierarchy. In addition, the software can also
 invalidate a KV cache entry/slot once a particular model run is
 complete. 
 
-We will create a well-defined application programming interface to the
+We will create a application programming interface to the
 controller in the accelerator from the CPU so that it can be easily
 integrated into standard software frameworks for hosting models such
 as vLLM.
@@ -173,7 +173,10 @@ a direct network path to/from the accelerator. In this case, the CPU
 would be primarily responsible for management, programming the
 accelerator, and handling non-standard KV cache types. In this mode,
 the accelerator behaves like the CPU counterpart of a network
-end-point from the perspective of the IPU.
+end-point from the perspective of the IPU. Note that the accelerator
+is CPU-attached, so that it has access to the performant memory
+interfaces directly attached to the CPU, rather than having to access
+the CPU memory via the IPU-CPU interface.
 
 To summarize, we will design a programmable pre-fetch engine based on
 the the range of current software strategies used to optimize KV cache
