@@ -184,15 +184,7 @@ contractors for Intel in the past.
 
 \PAR{Evaluation Plan.}
 %
-
-\begin{alltt}\scriptsize
-We will evaluate one accelerator on three different strategies:
-- Multi-Head Attention (MHA)~\cite{vaswani2017} and Multi-Query Attention~\cite{shazeer2019}
-
-
-- shared (grouped) attention GQA~\cite{ainslie2023}
-- Multi-head Latent Attention (MLA)~\cite{deepseekv2}  (i.e., low rank factorization)
-\end{alltt}
+Our primary metric of interest is \emph{Time Per Output Token} (TPOT), i.e., the average time required to generate each token after the first one. We will evaluate our proposed design using a variety of workloads (e.g., prompts) and context sizes. As baseline comparisons, we will quantify the performance of our KV Cache accelerator against a variety of software strategies for KV Cache management, including Multi-Head Attention~\cite{vaswani2017}, and Multi-Query Attention~\cite{shazeer2019}, Grouped Query Attention~\cite{ainslie2023}, and Multi-head Latent Attention~\cite{deepseekv2}.
   
 
 %% \begin{alltt}\scriptsize
@@ -221,22 +213,25 @@ feature three major demonstrator milestones at yearly intervals.
 
 \PAR{Biggest Technical Risk.}
 %
+The proposed project is ambitious, and as with any research proposal,
+carries with it a certain amount of uncertainty.
+To some extent, we have de-risked the project, as the PIs
+have developed several FPGA-based prototype systems in the past.
+That said, the largest possible threat to the success of this
+project, in our opinion, would be if we discovered that
+the ideal memory hierarchy for KV Cache requires unexpected
+off-chip changes. \rjs{I'm not sure what to say
+  about how to mitigate this risk.}
 
-\begin{alltt}\scriptsize
-  - We could discover that the ideal memory hierarchy
-   requires additional off-chip changes
-\end{alltt}
-  
 
 \PAR{Impact to Intel If Not Pursued.}
 %
-
-
-\begin{alltt}\scriptsize
-  - KVcache latency is a critical problem that actively
-  being pursued both by academia and business competitors
-\end{alltt}
-  
+KV Cache latency is a critical problem for inference
+pipelines that is actively
+being investigated both by academia and industry.
+Without a solution, Intel would be a competitive
+disadvantage compared to industry rivals.
+\rjs{@rajit: how is this?}
 
 \PAR{Differentiation from Existing Projects.}
 %
@@ -251,12 +246,12 @@ feature three major demonstrator milestones at yearly intervals.
 
 \PAR{Research Team.}
 %
-The proposed work will be carried out by a team
-of three researchers: the two faculty PIs, and one PhD
-student. PI Soul\'{e} is a
-recognized expert in software-defined networks. 
-Professor Manohar is an expert in asynchronous hardware
-design. 
+The proposed work will be carried out by a team of three researchers:
+the two faculty PIs, and one PhD student. Professor Soul\'{e} is a
+recognized expert in software-defined networks.  Professor Manohar is
+an expert in asynchronous hardware design. Both PIs have a
+demonstrated history of successful tech transfer and both have worked
+as contractors for Intel in the past.
 
 
 
